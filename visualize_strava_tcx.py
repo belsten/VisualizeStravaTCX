@@ -22,7 +22,7 @@ def get_as_array(r, tag):
     return np.array(el_array).astype(np.float)
 
 
-def plot_colourline(x,y,c, plot_colorbar=False):
+def plot_colourline(x,y,c, plot_colorbar=False, lbl=''):
     '''
     color bar is plotted based off values of c
     '''
@@ -33,7 +33,7 @@ def plot_colourline(x,y,c, plot_colorbar=False):
         a = ax.plot([x[i],x[i+1]], [y[i],y[i+1]], c=c_norm[i])
     if plot_colorbar:
         norm = mpl.colors.Normalize(vmin=c.min(), vmax=c.max())
-        plt.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax, orientation='vertical')
+        plt.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax, orientation='vertical', label=lbl)
     return
 
 
@@ -55,7 +55,7 @@ if __name__ == '__main__':
 
     fig = plt.figure(1, figsize=(5,5))
     ax  = fig.add_subplot(111)
-    plot_colourline(lon, lat, h, True)
+    plot_colourline(lon, lat, h, True, lbl='heart rate BPM')
     plt.axis('off')
     plt.axis('scaled')  # this looks wonky compared to the strava map, but provides some "ground truth"
     plt.show()
