@@ -2,6 +2,7 @@ import xml.etree.ElementTree as ET
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+import os
 
 def find_rec(node, element):
     def _find_rec(node, element, result):
@@ -17,6 +18,7 @@ def find_rec(node, element):
 
 
 def get_as_array(r, tag):
+    # r must be an array of leaf nodes
     el_list = find_rec(r, tag)
     el_array = [el.text for el in el_list]
     return np.array(el_array).astype(np.float)
@@ -24,7 +26,7 @@ def get_as_array(r, tag):
 
 def plot_colourline(x,y,c, plot_colorbar=False, lbl=''):
     '''
-    color bar is plotted based off values of c
+    continous color bar is plotted based off values of c
     '''
     cmap = mpl.cm.spring # change this for some fun
     c_norm = plt.cm.spring((c-np.min(c))/(np.max(c)-np.min(c)))
@@ -37,8 +39,23 @@ def plot_colourline(x,y,c, plot_colorbar=False, lbl=''):
     return
 
 
-if __name__ == '__main__':
-    fname = 'data/Afternoon_Ride-2.tcx'
+def plot_group_activities(path, include_keyword=''):
+    # get all of the files at the directory that are TCX and contain keyword
+    _, _, filenames = next(os.walk(path))
+    valid_files = list()
+    for f in filenames:
+        # get all the tcx files
+        split_string = f.split('.')
+        if split_string[-1] == 'tcx':
+            # check if file includes the desired keyword
+            if include_keyword in f:
+                # plot it!
+                plot_one_activity(path+f, do_show=False, colorbar=False)
+    plt.show()
+    return
+
+
+def plot_one_activity(fname, do_show=True, colorbar=True):
     tree = ET.parse(fname)
     root = tree.getroot()
 
@@ -52,13 +69,27 @@ if __name__ == '__main__':
 
     norm_z = (z-z.min())/np.max(z-z.min())
 
-
     fig = plt.figure(1, figsize=(5,5))
     ax  = fig.add_subplot(111)
-    plot_colourline(lon, lat, h, True, lbl='heart rate BPM')
+    plot_colourline(lon, lat, z, colorbar, lbl='heart rate BPM')
     plt.axis('off')
     plt.axis('scaled')  # this looks wonky compared to the strava map, but provides some "ground truth"
-    plt.show()
+    if do_show:    
+        plt.show()
+    return
+    
+
+if __name__ == '__main__':
+    fname = 'data/Afternoon_Ride-2.tcx'
+    #plot_one_activity(fname)
+
+    # multiple activites
+    data_path = 'data/2021-04-07_garmin_connect_export/'
+    key = 'St_Louis'
+    plot_group_activities(data_path, key)
+
+    
+    
     
         
 
